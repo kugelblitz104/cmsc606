@@ -1,0 +1,8 @@
+README.md
+pyproject.toml
+cmsc606.egg-info/PKG-INFO
+cmsc606.egg-info/SOURCES.txt
+cmsc606.egg-info/dependency_links.txt
+cmsc606.egg-info/requires.txt
+cmsc606.egg-info/top_level.txt
+hw/hw1/dotting.py
