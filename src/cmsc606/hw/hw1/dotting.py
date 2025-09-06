@@ -1,4 +1,4 @@
-import cmsc606.hw.hw1._config as c
+import numpy as np
 
 def dotting(f: list, other_info = None) -> tuple:
     '''
@@ -20,23 +20,60 @@ def dotting(f: list, other_info = None) -> tuple:
     '''
     # required x value
     x = float(f[0][1])
-    operations = c.functions.keys()
     vars = [x]
     
+    # evaluate y
     for ftuple in f[1:]:
         op = ftuple[0]
         args = ftuple[1:]
-        if op not in operations:
-            raise ValueError(f"Invalid operation: {op}")
-        
-        if op in ('X', 'C'):
-            vars.append(float(args[0]))
-        else:
-            func = c.functions[op]
-            vars.append(func(*[vars[x] for x in args]))
+                
+        match op:
+            case '+': vars.append(vars[args[0]] + vars[args[1]])
+            case '-': vars.append(vars[args[0]] - vars[args[1]])
+            case '*': vars.append(vars[args[0]] * vars[args[1]])
+            case '/': vars.append(vars[args[0]] / vars[args[1]])
+            case 'S': vars.append(np.square(vars[args[0]]))
+            case 'E': vars.append(np.exp(vars[args[0]]))
+            case 'L': vars.append(np.log(vars[args[0]]))
+            case 'X': vars.append(float(args[0]))
+            case 'C': vars.append(float(args[0]))
+            case _: raise ValueError(f"Invalid operation: {op}")
 
     y = float(vars[-1])
     
-    
-    dotted_y = 0
+    # evaluate dotted y
+    dotted = []
+    for ftuple in f:
+        op = ftuple[0]
+        args = ftuple[1:]
+        
+        match op:
+            case '+': dotted.append(dotted[args[0]] + dotted[args[1]])
+            case '-': dotted.append(dotted[args[0]] - dotted[args[1]])
+            case '*': dotted.append(
+                (dotted[args[0]] * vars[args[1]]) 
+                + (vars[args[0]] * dotted[args[1]])
+            )
+            case '/': dotted.append(
+                (
+                    (dotted[args[0]] * vars[1])
+                    - (vars[args[0] * dotted[1]])
+                )
+                / (np.square(args[1]))
+            )
+            case 'S': dotted.append(
+                (2.0 * vars[args[0]])
+                * (dotted[args[0]])
+            )
+            case 'E': dotted.append(
+                (np.exp(args[0]))
+                * (dotted[args[0]])
+            )
+            case 'L': dotted.append(dotted[args[0]] / vars[args[0]])
+            case 'X': dotted.append(1.0)
+            case 'C': dotted.append(0.0)
+            case _: raise ValueError(f"Invalid operation: {op}")
+
+
+    dotted_y = float(dotted[-1])
     return x, y, dotted_y
