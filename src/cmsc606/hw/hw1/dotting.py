@@ -27,16 +27,19 @@ def dotting(f: list, other_info: float | None = None) -> tuple:
         op = ftuple[0]
         args = ftuple[1:]
                 
+        u = args[0]
+        v = args[1] if len(args) > 1 else None
+        
         match op:
-            case '+': vars.append(vars[args[0]] + vars[args[1]])
-            case '-': vars.append(vars[args[0]] - vars[args[1]])
-            case '*': vars.append(vars[args[0]] * vars[args[1]])
-            case '/': vars.append(vars[args[0]] / vars[args[1]])
-            case 'S': vars.append(np.square(vars[args[0]]))
-            case 'E': vars.append(np.exp(vars[args[0]]))
-            case 'L': vars.append(np.log(vars[args[0]]))
-            case 'X': vars.append(float(args[0]))
-            case 'C': vars.append(float(args[0]))
+            case '+': vars.append(vars[u] + vars[v])
+            case '-': vars.append(vars[u] - vars[v])
+            case '*': vars.append(vars[u] * vars[v])
+            case '/': vars.append(vars[u] / vars[v])
+            case 'S': vars.append(np.square(vars[u]))
+            case 'E': vars.append(np.exp(vars[u]))
+            case 'L': vars.append(np.log(vars[u]))
+            case 'X': vars.append(float(u))
+            case 'C': vars.append(float(u))
             case _: raise ValueError(f"Invalid operation: {op}")
 
     y = float(vars[-1])
@@ -47,29 +50,32 @@ def dotting(f: list, other_info: float | None = None) -> tuple:
         op = ftuple[0]
         args = ftuple[1:]
         
+        u = args[0]
+        v = args[1] if len(args) > 1 else None
+        
         match op:
-            case '+': dotted.append(dotted[args[0]] + dotted[args[1]])
-            case '-': dotted.append(dotted[args[0]] - dotted[args[1]])
+            case '+': dotted.append(dotted[u] + dotted[v])
+            case '-': dotted.append(dotted[u] - dotted[v])
             case '*': dotted.append(
-                (dotted[args[0]] * vars[args[1]]) 
-                + (vars[args[0]] * dotted[args[1]])
+                (dotted[u] * vars[v]) 
+                + (vars[u] * dotted[v])
             )
             case '/': dotted.append(
                 (
-                    (dotted[args[0]] * vars[1])
-                    - (vars[args[0] * dotted[1]])
+                    (dotted[u] * vars[v])
+                    - (vars[u] * dotted[v])
                 )
-                / (np.square(args[1]))
+                / (np.square(vars[v]))
             )
             case 'S': dotted.append(
-                (2.0 * vars[args[0]])
-                * (dotted[args[0]])
+                (2.0 * vars[u])
+                * (dotted[u])
             )
             case 'E': dotted.append(
-                (np.exp(args[0]))
-                * (dotted[args[0]])
+                (np.exp(vars[u]))
+                * (dotted[u])
             )
-            case 'L': dotted.append(dotted[args[0]] / vars[args[0]])
+            case 'L': dotted.append(dotted[u] / vars[u])
             case 'X': dotted.append(1.0)
             case 'C': dotted.append(0.0)
             case _: raise ValueError(f"Invalid operation: {op}")
