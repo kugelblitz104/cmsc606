@@ -1,6 +1,6 @@
 import numpy as np
 
-def dotting(f: list, other_info = None) -> tuple:
+def dotting(f: list, other_info: float | None = None) -> tuple:
     '''
     Given a function, return 'dotted' version
     
@@ -19,7 +19,7 @@ def dotting(f: list, other_info = None) -> tuple:
         - dotted_y: dotted version of f(x)
     '''
     # required x value
-    x = float(f[0][1])
+    x = other_info if other_info is not None else float(f[0][1])
     vars = [x]
     
     # evaluate y
@@ -77,3 +77,12 @@ def dotting(f: list, other_info = None) -> tuple:
 
     dotted_y = float(dotted[-1])
     return x, y, dotted_y
+
+def repeated_dotting(f: list, step_count: int = 10) -> tuple:
+    x = float(f[0][1])
+    y = 0
+    dotted_y = 0
+    for i in range(step_count):
+        x, y, dotted_y = dotting(f, x)
+        x -= dotted_y * 0.001
+    return y, dotted_y
