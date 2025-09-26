@@ -61,8 +61,6 @@ def train_and_evaluate(
         w(ndarray): weight vector - # of features x 1
         finished weights after training
     """
-    np.random.seed(3)  # fixed randomness
-
     # generate random weights
     w = np.random.randn(numpy_x.shape[1])
     for epoch in range(n_epochs):
