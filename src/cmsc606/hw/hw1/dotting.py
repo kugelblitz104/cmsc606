@@ -28,8 +28,8 @@ def dotting(f: list, other_info: float | None = None) -> tuple:
         op = ftuple[0]
         args = ftuple[1:]
 
-        u = args[0]
-        v = args[1] if len(args) > 1 else None
+        u = args[0] if args[0] is not None else 0
+        v = args[1] if len(args) > 1 else 0
 
         match op:
             case "+":
@@ -61,8 +61,8 @@ def dotting(f: list, other_info: float | None = None) -> tuple:
         op = ftuple[0]
         args = ftuple[1:]
 
-        u = args[0]
-        v = args[1] if len(args) > 1 else None
+        u = args[0] if args[0] is not None else 0
+        v = args[1] if len(args) > 1 else 0
 
         match op:
             case "+":
