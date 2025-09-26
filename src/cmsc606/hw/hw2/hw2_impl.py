@@ -21,7 +21,7 @@ def read_csv_convert_to_numpy(fileName: str) -> Tuple[np.ndarray, np.ndarray]:
     # convert to numpy array
     numpy_x = df[["ZeroToSixty", "PowerHP"]].to_numpy()
     numpy_y = np.where(df["IsCar"] > 0, 1, -1)
-    return numpy_x, numpy_y
+    return numpy_x, numpy_y.reshape(-1, 1)
 
 
 def calc_error_rate_for_single_vector_w(
@@ -83,50 +83,6 @@ def train_and_evaluate(
     return w
 
 
-# def function_error_rate_2D(
-#     w1_range: np.ndarray,
-#     w2_range: np.ndarray,
-#     numpy_x: np.ndarray,
-#     numpy_y: np.ndarray,
-# ):
-#     """
-#     Calculate the error rate for all possible weight vectors
-#     within given ranges w1_range and w2_range
-#
-#     Args:
-#         w1_range(ndarray): range of values for w1
-#         w2_range(ndarray): range of values for w2
-#         numpy_x(ndarray): feature vectors - # of samples x # of features
-#         numpy_y(ndarray): class vectors - # of samples x 1
-#
-#     Returns:
-#         error_rates(ndarray): error rates for all possible weight vectors
-#     """
-#     # create mesh grids for w1 range and w2 range
-#     w1, w2 = np.meshgrid(w1_range, w2_range, indexing="ij")
-#
-#     # stack mesh grids to get all possible w arrays
-#     w_stack = np.stack([w1, w2], axis=-1)
-#
-#     # flatten w_stack to a list of all possible weights
-#     # in a 2 column, r1 * r2 len 2d array
-#     w_flat = w_stack.reshape(-1, 2)
-#
-#     # calculate prediction scores
-#     scores = numpy_x @ w_flat.T
-#
-#     # get predictions
-#     y_pred = np.sign(scores).astype("int64")
-#
-#     # reshape y into a column vector for comparison with y_pred
-#     y = numpy_y.reshape(-1, 1)
-#
-#     # calculate error rates for all weights
-#     error_rates = np.mean(y_pred != y, axis=0)
-#
-#     # reshape error_rates to target output size
-#     return error_rates.reshape(w1.shape)
-
 def function_error_rate_2D(
     w1_range: np.ndarray,
     w2_range: np.ndarray,
@@ -146,15 +102,20 @@ def function_error_rate_2D(
     Returns:
         error_rates(ndarray): error rates for all possible weight vectors
     """
-    error_rates = np.zeros((len(w1_range), len(w2_range)))
-    for i, w1 in enumerate(w1_range):
-        for j, w2 in enumerate(w2_range):
-            error_rate = calc_error_rate_for_single_vector_w(
-                np.array([w1, w2]), numpy_x, numpy_y
-            )
-            error_rates[i, j] = error_rate
+    # create mesh grids for w1 range and w2 range
+    w1, w2 = np.meshgrid(w1_range, w2_range, indexing="ij")
 
-    return error_rates
+    # stack mesh grids to get all possible w arrays
+    w_stack = np.stack([w1, w2], axis=-1)
+
+    # get predictions
+    y_pred = np.sign(w_stack @ numpy_x.T).astype("int64")
+
+    # reshape y into a column vector for comparison with y_pred
+    y = numpy_y.reshape(1, 1, -1)
+
+    # calculate error rates for all weights
+    return np.mean(y_pred != y, axis=2)
 
 
 # helper functions
