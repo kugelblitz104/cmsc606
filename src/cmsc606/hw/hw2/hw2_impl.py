@@ -113,4 +113,4 @@ def function_error_rate_2D(
     y = numpy_y.reshape(1, 1, -1)
 
     # calculate error rates for all weights
-    return np.mean(y_pred != y, axis=2)
+    return np.mean(y_pred != y, axis=2).T
