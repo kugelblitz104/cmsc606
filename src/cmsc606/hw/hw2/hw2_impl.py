@@ -64,22 +64,21 @@ def train_and_evaluate(
     # generate random weights
     w = np.random.randn(numpy_x.shape[1])
     for epoch in range(n_epochs):
-        pred_y = get_predictions(w, numpy_x)
+        for i, sample in enumerate(numpy_x):
+            pred = np.sign(sample.T @ w)
+            true_y = numpy_y[i]
+            if pred != true_y:
+                w += c * 2.0 * true_y * sample
+
+        # calculate error rate
         error_rate = calc_error_rate_for_single_vector_w(w, numpy_x, numpy_y)
 
         # print error rate for each epoch
         print(error_rate)
 
-        # calculate loss
-        loss = pred_y - numpy_y
+        if error_rate == 0:
+            break
 
-        # calculate gradient
-        gradient = loss * numpy_x.T
-
-        # calculate weight adjustment
-        w_delta = np.sum(gradient, axis=1) * c
-
-        w += w_delta
 
     return w
 
