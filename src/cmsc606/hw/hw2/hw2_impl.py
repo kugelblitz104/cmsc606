@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from typing import Tuple
 
 
@@ -39,8 +38,7 @@ def calc_error_rate_for_single_vector_w(
         error_rate(float): # of errors / # of samples
     """
     # get predicted values
-    pred = get_predictions(w, numpy_x)
-
+    pred = np.sign(numpy_x @ w)
     # calc error rate
     return np.sum(pred != numpy_y) / numpy_x.shape[0]
 
@@ -62,13 +60,13 @@ def train_and_evaluate(
         finished weights after training
     """
     # generate random weights
-    w = np.random.randn(numpy_x.shape[1])
+    w = np.random.randn(numpy_x.shape[1], 1)
     for epoch in range(n_epochs):
         for i, sample in enumerate(numpy_x):
             pred = np.sign(sample.T @ w)
             true_y = numpy_y[i]
             if pred != true_y:
-                w += c * 2.0 * true_y * sample
+                w += c * 2.0 * true_y * sample.reshape(-1, 1)
 
         # calculate error rate
         error_rate = calc_error_rate_for_single_vector_w(w, numpy_x, numpy_y)
@@ -116,22 +114,3 @@ def function_error_rate_2D(
 
     # calculate error rates for all weights
     return np.mean(y_pred != y, axis=2)
-
-
-# helper functions
-def get_predictions(
-    w: np.ndarray,
-    numpy_x: np.ndarray,
-) -> np.ndarray:
-    """
-    Get the predictions for a weight vector w and samples x
-
-    Args:
-        w(ndarray): weight vector - # of features:
-        numpy_x(ndarray): feature vectors - # of samples x # of features:
-
-    Returns:
-        predictions(ndarray): class vectors - # of samples
-    """
-    w = np.squeeze(w)
-    return np.sign(np.sum(numpy_x * w, axis=1)).astype("int64")
