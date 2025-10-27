@@ -8,7 +8,7 @@ def my_train(train_dataset):
     Train a model on the given dataset.
 
     Args:
-        train_dataset:
+        train_dataset(MNIST):
             The dataset to train on.
 
     Returns:
@@ -17,22 +17,46 @@ def my_train(train_dataset):
             The trained bias vector, shape of (num_classes,)
     """
     # hyperparameters
-    learning_rate = 0.1
-    l1_lambda = 0.005
+    learning_rate = 1.2
+    l1_lambda = 0.001
+    lr_decay = 0.3
     num_epochs = 5
-    batch_size = 64
+    batch_size = 256
 
-    # create data loader for fast image processing & batching
     return train_with_params(
-        train_dataset, learning_rate, l1_lambda, num_epochs, batch_size
+        train_dataset, learning_rate, lr_decay, l1_lambda, num_epochs, batch_size
     )
 
 
-def train_with_params(train_dataset, learning_rate, l1_lambda, num_epochs, batch_size):
+def train_with_params(
+    train_dataset,
+    learning_rate: float,
+    lr_decay: float,
+    l1_lambda: float,
+    num_epochs: int,
+    batch_size: int,
+):
+    """
+    Perform training with given hyperparameters
+
+    Args:
+        train_dataset (MNIST): training dataset
+        learning_rate (float): learning rate
+        lr_decay (float): learning rate decay, rate at which to decay learning rate each epoch
+        l1_lambda (float): L1 normalization factor
+        num_epochs (int): # of epochs
+        batch_size (int): batch size
+
+    Returns:
+        Tuple[W, b]:
+            The trained weight matrix, shape of (num_classes, num_features)
+            The trained bias vector, shape of (num_classes,)
+    """
     # hyperparameters
     num_features = 784  # 28x28 pixels
     num_classes = 10
     learning_rate = learning_rate
+    lr_decay = lr_decay
     l1_lambda = l1_lambda
     num_epochs = num_epochs
     batch_size = batch_size
@@ -61,10 +85,10 @@ def train_with_params(train_dataset, learning_rate, l1_lambda, num_epochs, batch
             ce_loss = criterion(logits, labels)
 
             # l1 regularization
-            ## compute l1 regularization term
+            # compute l1 regularization term
             l1_reg = l1_lambda * torch.sum(torch.abs(W))
 
-            ## total loss
+            # total loss
             loss = ce_loss + l1_reg
 
             # backwards propagation
@@ -82,8 +106,12 @@ def train_with_params(train_dataset, learning_rate, l1_lambda, num_epochs, batch
             epoch_loss += loss.item()
 
         print(
-            f"Epoch [{epoch + 1}/{num_epochs}], Loss: {epoch_loss / len(train_loader):.4f}"
+            f"Epoch [{epoch + 1}/{num_epochs}], Loss: {epoch_loss / len(train_loader):.4f}, LR: {learning_rate:.4f}"
         )
+
+        # decay learning rate for aggresive initial learning rate
+        # that adjusts to be smaller each epoch for smaller adjustments
+        learning_rate = learning_rate * (1 - lr_decay)
 
     # convert tensors to numpy arrays
     W_np = W.detach().numpy()
@@ -128,8 +156,15 @@ def my_test(W, b, test_dataset):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-    # calculate accuracy
+    # calculate accuracy & error rate
     accuracy = correct / total
+    error_rate = 1 - accuracy
     print(f"Test Accuracy: {accuracy * 100:.2f}%")
+    print(f"Test error rate: {error_rate * 100:.2f}%")
 
-    return accuracy
+    if error_rate < 0.125:
+        print("✅ Test passed, error rate is below 12.5%")
+    else:
+        print("❌ Test failed, error rate is above 12.5%")
+
+    return error_rate
